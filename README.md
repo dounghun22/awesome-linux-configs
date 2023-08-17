@@ -36,7 +36,7 @@ However, for writing SystemVerilog, certain options are necessary, and I have ap
 If ctags is not installed in your system, install the ctags before installing configuration.
 
     sudo apt update
-    sudo pat install ctags
+    sudo apt install ctags
 
 **(4) TMUX**
 
