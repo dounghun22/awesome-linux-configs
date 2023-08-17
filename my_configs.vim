@@ -64,3 +64,4 @@ cnoreabbrev vsterm vert term
 cnoreabbrev spterm term
 
 source ~/.vim_runtime/personalized.vim
+
