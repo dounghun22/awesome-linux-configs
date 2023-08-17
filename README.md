@@ -55,7 +55,7 @@ If tmux is not installed tmux in your system, install the tmux before installing
 
 You can simply install it using the following commands.
 
-    git clone --depts=1 https://github.com/dounghun22/awesome-linux-configs.git ~/.vim_runtime
+    git clone --depth=1 https://github.com/dounghun22/awesome-linux-configs.git ~/.vim_runtime
     cd ~/.vim_runtime
     chmod +x ~/.vim_runtime/install_awesome_configs.sh
     ./install_awesome_configs.sh #Do not use sh ./install_awesome_configs.sh
