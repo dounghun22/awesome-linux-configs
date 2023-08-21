@@ -1,6 +1,6 @@
 <center> <h1> Awesome Linux Environment Configurations! </h1> </center>
 
-Hello~! I am working as a SoC design engineer.
+Hello~!
 I have been using Linux environment for several years for development.
 The Linux environment is essential and useful for both hardware and software developers.
 However, many people feel puzzled when they first encounter it.
@@ -9,7 +9,6 @@ It operates on a CLI basis, and many actions are performed solely using the keyb
 However, Linux offers the ability to configure a wide range of settings, resulting in an environment that can be incredibly beautiful, convenient, and useful.
 This repository provides a foundational setup for a Linux environment that is useful for basic usage.
 It includes configurations for vim, bash, tmux, and ctags.
-The basic setup can be used in various ways, and since I am an RTL designer, it includes environment configurations related to SystemVerilog.
 
 ## Configs & Dependencies
 
