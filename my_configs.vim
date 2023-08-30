@@ -11,6 +11,9 @@ set hlsearch
 set mouse=a
 set ttymouse=sgr
 
+set keyprotocol=
+let &term=&term
+
 set smartindent
 set cindent
 set showmatch
