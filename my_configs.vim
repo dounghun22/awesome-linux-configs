@@ -35,7 +35,7 @@ set guifont=D2Coding:h12:cANSI:qDRAFT*
 
 let g:indentLine_color_term = 250
 
-autocmd FileType make set noexpandtab
+let g:ranbow_active=1
 
 cnoreabbrev t Tlist
 cnoreabbrev W w
@@ -63,5 +63,20 @@ iunmap $4
 cnoreabbrev vsterm vert term
 cnoreabbrev spterm term
 
+"ctags setting
+nnoremap gd gd``
+set tags=./tags,tags
+set tags+=../tags
+set tags+=../../tags
+set tags+=../../../tags
+set tags+=../../../../tags
+set tags+=../../../../../tags
+set tags+=../../../../../../tags
+
+nnoremap <C-]> g<C-]>
+nnoremap <C-LeftMouse> <LeftMouse>g<c-]>
+
+
+"Personalized
 source ~/.vim_runtime/personalized.vim
 
