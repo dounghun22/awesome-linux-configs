@@ -15,7 +15,7 @@ LS_COLORS='rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:c
 export LS_COLORS
 alias ls="ls --color=auto"
 alias ll='ls -alF -h'
-alias ln="command ls -1"
+alias l1="command ls -1"
 
 #alias setting
 alias python='python3'
