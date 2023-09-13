@@ -76,7 +76,9 @@ set tags+=../../../../../../tags
 nnoremap <C-]> g<C-]>
 nnoremap <C-LeftMouse> <LeftMouse>g<c-]>
 
-
 "Personalized
 source ~/.vim_runtime/personalized.vim
+
+set keyprotocol=
+let &term = &term
 
