@@ -89,3 +89,9 @@ autocmd BufRead,BufnewFile *.f set filetype=tcl
 autocmd BufRead,BufnewFile *.sdc set filetype=tcl
 autocmd BufRead,BufnewFile *.tcl set filetype=tcl
 autocmd FileType tcl so ~/.vim_runtime/lang_plugin/tcl/tcl.vim
+
+au BufNewFile,BufRead *.log set filetype=log
+au BufNewFile,BufRead *_log set filetype=log
+au BufNewFile,BufRead *.LOG set filetype=log
+au BufNewFile,BufRead *_LOG set filetype=log
+au FileType log so ~/.vim_runtime/lang_plugin/log/log.vim
