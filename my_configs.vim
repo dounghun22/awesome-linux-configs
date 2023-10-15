@@ -53,6 +53,8 @@ map 5 <C-W>=<CR>
 map 6 :RainbowToggle<CR>
 map ` :NERDTreeToggle<CR>
 map ~ :Commentary<CR>
+map 9 b
+map 0 w
 
 iunmap $1
 iunmap $2
@@ -79,6 +81,9 @@ nnoremap <C-LeftMouse> <LeftMouse>g<c-]>
 "Personalized
 source ~/.vim_runtime/personalized.vim
 
+"Key protocol setting for newer vim versions
+"Do not move these lines
+"They should be located at last of this file.
 set keyprotocol=
 let &term = &term
 
