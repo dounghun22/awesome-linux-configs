@@ -35,8 +35,6 @@ set guifont=D2Coding:h12:cANSI:qDRAFT*
 
 let g:indentLine_color_term = 250
 
-let g:ranbow_active=1
-
 cnoreabbrev t Tlist
 cnoreabbrev W w
 cnoreabbrev Q q
