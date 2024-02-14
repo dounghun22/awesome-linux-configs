@@ -63,4 +63,6 @@ endtry' > ~/.vimrc
 
 touch ~/.vim_runtime/personalized.vim
 
+chmod +x ~/.vim_runtime/fun/*
+
 echo "Installed the Ultimate Vim configuration successfully! Enjoy :-)"

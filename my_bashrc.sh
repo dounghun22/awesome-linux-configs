@@ -23,4 +23,6 @@ alias tags="ctags -R --c++-kinds=+p --fields=+iaS --extra=+q"
 alias grep='grep --color=auto -n'
 alias bgrep="command grep"
 
+export PATH="$PATH:~/.vim_runtime/fun"
+
 source ~/.vim_runtime/personalized.sh

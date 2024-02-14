@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo "\e[31mFUN LIST! enjoy~:)\e[0m"
+
+ls ~/.vim_runtime/fun/
