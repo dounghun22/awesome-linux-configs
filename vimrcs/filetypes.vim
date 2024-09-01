@@ -82,7 +82,7 @@ let vim_markdown_folding_disabled = 1
 au BufNewFile,BufRead *.v set filetype=systemverilog
 au BufNewFile,BufRead *.sv set filetype=systemverilog
 au FileType systemverilog so ~/.vim_runtime/lang_plugin/verilog_systemverilog/syntax/verilog_systemverilog.vim
-au FileType systemverilog let g:AutoPairs = {'(':')', '[':']', '{':'}','begin':'end'}
+au FileType systemverilog let g:AutoPairs = {'(':')', '[':']', '{':'}'}
 
 autocmd FileType make set noexpandtab
 autocmd BufRead,BufnewFile *.f set filetype=tcl

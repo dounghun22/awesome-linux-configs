@@ -76,6 +76,8 @@ set tags+=../../../../../../tags
 nnoremap <C-]> g<C-]>
 nnoremap <C-LeftMouse> <LeftMouse>g<c-]>
 
+unmap <C-V>
+
 "Personalized
 source ~/.vim_runtime/personalized.vim
 
