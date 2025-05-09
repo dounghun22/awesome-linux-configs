@@ -1,5 +1,5 @@
 function! MakeFileHeader(fc,mc,lc)
-    exec "gg"
+    exec "normal gg"
     set paste
     let s:author = ""
     let s:copyright = ""
@@ -20,7 +20,7 @@ function! MakeFileHeader(fc,mc,lc)
     let s:comment .= a:mc . " File:    " . expand('%:t') . "\r"
     let s:comment .= a:mc . " Author:  " . s:author . "\r"
     let s:comment .= a:mc . " Created: " . strftime("%Y-%m-%d") . "\r"
-    let s:comment .= a:lc . "\r"
+    let s:comment .= a:lc . "\r\r"
     exec "normal i" . s:comment
     set nopaste
 endfunction
