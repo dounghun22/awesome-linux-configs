@@ -31,7 +31,7 @@ set statusline=\ %<%l:%v\ [%P]%=%a\ %h%m%r\ %F\
 set ruler
 set fileencodings=utf8,euc-kr
 
-set guifont=D2Coding:h12:cANSI:qDRAFT*
+set guifont=D2Coding:h14:cANSI:qDRAFT*
 
 let g:indentLine_color_term = 250
 
@@ -76,7 +76,9 @@ set tags+=../../../../../../tags
 nnoremap <C-]> g<C-]>
 nnoremap <C-LeftMouse> <LeftMouse>g<c-]>
 
-unmap <C-V>
+if mapcheck('<C-V>') != ''
+  unmap <C-V>
+endif
 
 "Personalized
 source ~/.vim_runtime/personalized.vim
@@ -86,4 +88,3 @@ source ~/.vim_runtime/personalized.vim
 "They should be located at last of this file.
 set keyprotocol=
 let &term = &term
-
