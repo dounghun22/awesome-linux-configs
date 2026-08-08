@@ -19,7 +19,7 @@
 # |-------------------------------------------------------------------------|
 # |      Date     |                    Revision Summary                     |
 # |---------------|---------------------------------------------------------|
-# |   2026-08-09  | Add portable installation and configuration tests.      |
+# |   2026-08-09  | Replace ripgrep dependency with standard grep.          |
 # |---------------|---------------------------------------------------------|
 #
 # TODO, FIXME, NOTE
@@ -54,19 +54,19 @@ bash -n "$ROOT_DIR/my_bashrc.sh"
 bash -n "$ROOT_DIR/tests/run_tests.sh"
 sh -n "$ROOT_DIR/fun/fun"
 
-if ! command -v rg >/dev/null 2>&1; then
-    printf 'Error: rg is required to run repository tests.\n' >&2
+if ! command -v grep >/dev/null 2>&1; then
+    printf 'Error: grep is required to run repository tests.\n' >&2
     exit 1
 fi
 
-if rg -n --hidden \
-    --glob '!.git/**' \
-    --glob '!README.md' \
-    --glob '!AGENTS.md' \
-    --glob '!tests/**' \
-    --glob '!sources_non_forked/**' \
-    --glob '!sources_forked/**' \
-    --glob '!my_plugins/**' \
+if grep -RInE \
+    --exclude-dir='.git' \
+    --exclude-dir='tests' \
+    --exclude-dir='sources_non_forked' \
+    --exclude-dir='sources_forked' \
+    --exclude-dir='my_plugins' \
+    --exclude='README.md' \
+    --exclude='AGENTS.md' \
     '~/.vim_runtime|depricated' "$ROOT_DIR"; then
     printf 'Error: maintained files contain a legacy runtime path.\n' >&2
     exit 1
