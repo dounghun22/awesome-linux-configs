@@ -42,8 +42,8 @@ cnoreabbrev Wq wq
 cnoreabbrev wQ wq
 cnoreabbrev WQ wq
 
-map 1 :set paste<CR>
-map 2 :set nopaste<CR>
+map 1 :set paste!<CR>
+map 2 :set wrap!<CR>
 map 3 :Tlist<CR>
 map <f3> /
 map 4 :nohl<CR>

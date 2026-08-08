@@ -104,3 +104,26 @@ let g:rainbow_load_separately = [
     \ [ '*.cpp' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
     \ [ '*.{html,htm}' , [['(', ')'], ['\[', '\]'], ['{', '}'], ['<\a[^>]*>', '</[^>]*>']] ],
     \ ]
+
+""""""""""""""""""""""""""""""
+" => Large File
+""""""""""""""""""""""""""""""
+" Block large files from loading
+augroup blocklargefile
+  autocmd!
+  let g:LargeFile = 1024 * 1024 * 5 " 5 MiB
+
+  function! BlockReadingLargeFile()
+     let file = expand("<afile>")
+
+     if getfsize(file) > g:LargeFile
+       bw
+       echoerr "Blocked large file from loading:"expand("<afile>")
+     else
+       exe "edit" file
+       exe "doautocmd BufReadPost" file
+     endif
+  endfunction
+
+  autocmd BufReadCmd * call BlockReadingLargeFile()
+augroup end

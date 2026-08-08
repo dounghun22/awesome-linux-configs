@@ -33,6 +33,7 @@ else
 fi
 
 touch ~/.vim_runtime/personalized.sh
+touch ~/.vim_runtime/secret.sh
 
 if [ -e ~/.ctags ]; then
     cp ~/.ctags ~/.vim_runtime/backup

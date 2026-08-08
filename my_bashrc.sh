@@ -26,3 +26,4 @@ alias bgrep="command grep"
 export PATH="$PATH:~/.vim_runtime/fun"
 
 source ~/.vim_runtime/personalized.sh
+source ~/.vim_runtime/secret.sh
