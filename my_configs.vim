@@ -1,3 +1,10 @@
+" Determine the runtime directory from the generated vimrc or this file.
+if !exists('g:vim_runtime_path') || empty(g:vim_runtime_path)
+    let g:vim_runtime_path = fnamemodify(expand('<sfile>:p'), ':h')
+endif
+
+execute 'source ' . fnameescape(g:vim_runtime_path . '/personalized.vim')
+
 " For Neovim 0.1.3 and 0.1.4
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 
@@ -81,8 +88,6 @@ if mapcheck('<C-V>') != ''
 endif
 
 "Personalized
-source ~/.vim_runtime/personalized.vim
-
 "Key protocol setting for newer vim versions
 "Do not move these lines
 "They should be located at last of this file.

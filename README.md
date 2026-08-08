@@ -54,11 +54,18 @@ If tmux is not installed tmux in your system, install the tmux before installing
 
 You can simply install it using the following commands.
 
-    git clone --depth=1 https://github.com/dounghun22/awesome-linux-configs.git ~/.vim_runtime
-    cd ~/.vim_runtime
-    chmod +x ~/.vim_runtime/install_awesome_configs.sh
-    ./install_awesome_configs.sh #Do not use sh ./install_awesome_configs.sh
-    source ~/.bashrc #source bash configurations
+    export VIM_RUNTIME="$HOME/.vim_runtime"
+    git clone --depth=1 https://github.com/dounghun22/awesome-linux-configs.git "$VIM_RUNTIME"
+    cd "$VIM_RUNTIME"
+    ./install_awesome_configs.sh --dry-run
+    ./install_awesome_configs.sh --force
+    source ~/.bashrc
+
+The installer detects its own directory, so `VIM_RUNTIME` may point to any readable
+checkout location. It checks for Vim, Tmux, and Ctags before installation. Existing
+configuration files are copied to `"$VIM_RUNTIME/backup/YYYYMMDD-HHMMSS"` before
+replacement. Use `--dry-run` to review changes and `--force` for non-interactive
+installation.
 
 After the installation is complete, you will be able to observe changes in your environment.
 If your terminal was originally composed of a black background and white text, you will feel the presence of colors in the terminal above all else.
@@ -76,15 +83,17 @@ On a smaller scale, you can begin with colorscheme configuration, and on a large
 
 #### **(1) Add amd Modify Configurations**
 
-You just write your own configuration to ~/.vim_runtime/personalized.vim file.
+You just write your own configuration to `$VIM_RUNTIME/personalized.vim` file.
 
 #### **(2) Install Plugins**
 
-This configuration helps you install vim plugins easily. You just clone plugin repository to ~/.vim_runtime/my_plugins.
+This configuration helps you install vim plugins easily. You just clone plugin repository to
+`$VIM_RUNTIME/my_plugins`.
 If you are managing your own Git branch and operating a remote repository, it's recommended to remove the Git attributes of cloned plugins and then push.
 
 #### **(3) Colorschme**
-You can replace 'tender' with your desired colorscheme in ~/.vim_runtime/my_configs.vim, around line 6 where the colorscheme 'tender' is mentioned.
+You can replace 'tender' with your desired colorscheme in `$VIM_RUNTIME/my_configs.vim`,
+around line 6 where the colorscheme 'tender' is mentioned.
 
 The below table lists pre-installed colorschemes. (from [rafi/awesome-vim-colorschemes])
 
@@ -220,19 +229,21 @@ The below table lists pre-installed colorschemes. (from [rafi/awesome-vim-colors
 [wombat256]: https://github.com/vim-scripts/wombat256.vimi
 [monokai]: https://github.com/ku1ik/vim-monokai.git
 
-You can also add your own colorschemes .vim file to ~/.vim_runtime/my_plugins/colorschemes/colors/.
+You can also add your own colorschemes `.vim` file to
+`$VIM_RUNTIME/my_plugins/colorschemes/colors/`.
 
 ## BASH
 
-You just add your bash configuration to ~/.vim_runtime/personalized.sh file.
+You just add your bash configuration to `$VIM_RUNTIME/personalized.sh` file.
+Optional host-specific secrets may be placed in the untracked `$VIM_RUNTIME/secret.sh` file.
 
 ### TMUX
 
-You just modify and add ~/.vim_runtime/tmux_config/.tmux.conf.local file.
+You just modify and add `$VIM_RUNTIME/tmux_config/.tmux.conf.local` file.
 
 ### CTAGS
 
-You just modify and add ~/.vim_runtime/ctags/.ctags file.
+You just modify and add `$VIM_RUNTIME/ctags/.ctags` file.
 
 The MIT License (MIT)
 =====================
@@ -259,4 +270,3 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
-

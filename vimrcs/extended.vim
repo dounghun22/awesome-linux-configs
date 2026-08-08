@@ -1,3 +1,6 @@
+let s:vim_runtime_path = get(g:, 'vim_runtime_path',
+      \ fnamemodify(expand('<sfile>:p'), ':h:h'))
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Important: 
 "       This requries that you install https://github.com/amix/vimrc !
@@ -35,8 +38,15 @@ colorscheme peaksea
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Fast editing and reloading of vimrc configs
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-map <leader>e :e! ~/.vim_runtime/my_configs.vim<cr>
-autocmd! bufwritepost ~/.vim_runtime/my_configs.vim source ~/.vim_runtime/my_configs.vim
+execute 'nnoremap <leader>e :e! ' . fnameescape(
+      \ s:vim_runtime_path . '/my_configs.vim') . '<cr>'
+
+augroup vim_runtime_personal_config
+  autocmd!
+  execute 'autocmd BufWritePost ' . fnameescape(
+        \ s:vim_runtime_path . '/my_configs.vim') . ' source ' . fnameescape(
+        \ s:vim_runtime_path . '/my_configs.vim')
+augroup END
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -44,7 +54,8 @@ autocmd! bufwritepost ~/.vim_runtime/my_configs.vim source ~/.vim_runtime/my_con
 "    means that you can undo even when you close a buffer/VIM
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 try
-    set undodir=~/.vim_runtime/temp_dirs/undodir
+    execute 'set undodir=' . fnameescape(
+          \ s:vim_runtime_path . '/temp_dirs/undodir')
     set undofile
 catch
 endtry

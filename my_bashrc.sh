@@ -1,3 +1,34 @@
+#!/usr/bin/env bash
+
+###############################################################################
+# Copyright (C) 2026 by Donghun Jeong. All right reserved.
+#
+# Basic Information
+# |--------------|----------------------------------------------------------|
+# | File Name    | my_bashrc.sh                                            |
+# |--------------|----------------------------------------------------------|
+# | Description  | Configure the interactive Bash environment.              |
+# |--------------|----------------------------------------------------------|
+# | Author       | Donghun Jeong(dounghun22)                                |
+# |--------------|----------------------------------------------------------|
+# | Created      | 2026-08-09                                               |
+# |--------------|----------------------------------------------------------|
+# | Last Modified| 2026-08-09 00:00:00                                      |
+# |--------------|----------------------------------------------------------|
+#
+# Revision History
+# |-------------------------------------------------------------------------|
+# |      Date     |                    Revision Summary                     |
+# |---------------|---------------------------------------------------------|
+# |   2026-08-09  | Resolve runtime paths relative to this file.            |
+# |---------------|---------------------------------------------------------|
+#
+# TODO, FIXME, NOTE
+
+###############################################################################
+
+VIM_RUNTIME="${VIM_RUNTIME:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)}"
+export VIM_RUNTIME
 
 #color setting : prompt
 color_prompt=yes
@@ -23,7 +54,17 @@ alias tags="ctags -R --c++-kinds=+p --fields=+iaS --extra=+q"
 alias grep='grep --color=auto -n'
 alias bgrep="command grep"
 
-export PATH="$PATH:~/.vim_runtime/fun"
+case ":$PATH:" in
+    *":$VIM_RUNTIME/fun:"*) ;;
+    *) export PATH="$PATH:$VIM_RUNTIME/fun" ;;
+esac
 
-source ~/.vim_runtime/personalized.sh
-source ~/.vim_runtime/secret.sh
+if [[ -f "$VIM_RUNTIME/personalized.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "$VIM_RUNTIME/personalized.sh"
+fi
+
+if [[ -f "$VIM_RUNTIME/secret.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "$VIM_RUNTIME/secret.sh"
+fi

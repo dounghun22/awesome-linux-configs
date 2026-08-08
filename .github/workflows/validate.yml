@@ -1,0 +1,33 @@
+# Validate shell scripts and headless Vim configuration loading.
+name: Validate
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  shell-and-vim:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install validation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            shellcheck vim tmux universal-ctags
+
+      - name: Run ShellCheck
+        run: |
+          shellcheck --severity=error \
+            install_awesome_configs.sh \
+            my_bashrc.sh \
+            fun/fun \
+            tests/run_tests.sh
+
+      - name: Run repository tests
+        run: bash tests/run_tests.sh

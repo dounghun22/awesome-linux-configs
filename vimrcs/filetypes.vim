@@ -1,3 +1,6 @@
+let s:vim_runtime_path = get(g:, 'vim_runtime_path',
+      \ fnamemodify(expand('<sfile>:p'), ':h:h'))
+
 """"""""""""""""""""""""""""""
 " => Python section
 """"""""""""""""""""""""""""""
@@ -81,20 +84,24 @@ let vim_markdown_folding_disabled = 1
 
 au BufNewFile,BufRead *.v set filetype=systemverilog
 au BufNewFile,BufRead *.sv set filetype=systemverilog
-au FileType systemverilog so ~/.vim_runtime/lang_plugin/verilog_systemverilog/syntax/verilog_systemverilog.vim
+execute 'au FileType systemverilog source ' . fnameescape(
+      \ s:vim_runtime_path . '/lang_plugin/verilog_systemverilog/syntax/'
+      \ . 'verilog_systemverilog.vim')
 au FileType systemverilog let g:AutoPairs = {'(':')', '[':']', '{':'}'}
 
 autocmd FileType make set noexpandtab
 autocmd BufRead,BufnewFile *.f set filetype=tcl
 autocmd BufRead,BufnewFile *.sdc set filetype=tcl
 autocmd BufRead,BufnewFile *.tcl set filetype=tcl
-autocmd FileType tcl so ~/.vim_runtime/lang_plugin/tcl/tcl.vim
+execute 'autocmd FileType tcl source ' . fnameescape(
+      \ s:vim_runtime_path . '/lang_plugin/tcl/tcl.vim')
 
 au BufNewFile,BufRead *.log set filetype=log
 au BufNewFile,BufRead *_log set filetype=log
 au BufNewFile,BufRead *.LOG set filetype=log
 au BufNewFile,BufRead *_LOG set filetype=log
-au FileType log so ~/.vim_runtime/lang_plugin/log/log.vim
+execute 'autocmd FileType log source ' . fnameescape(
+      \ s:vim_runtime_path . '/lang_plugin/log/log.vim')
 
 let g:rainbow_active = 1
 
