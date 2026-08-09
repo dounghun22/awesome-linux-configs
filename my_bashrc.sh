@@ -13,7 +13,7 @@
 # |--------------|----------------------------------------------------------|
 # | Created      | 2026-08-09                                               |
 # |--------------|----------------------------------------------------------|
-# | Last Modified| 2026-08-09 00:00:00                                      |
+# | Last Modified| 2026-08-09 12:30:00                                      |
 # |--------------|----------------------------------------------------------|
 #
 # Revision History
@@ -21,6 +21,7 @@
 # |      Date     |                    Revision Summary                     |
 # |---------------|---------------------------------------------------------|
 # |   2026-08-09  | Resolve runtime paths relative to this file.            |
+# |   2026-08-09  | Route the tags alias through the Ctags runtime wrapper.  |
 # |---------------|---------------------------------------------------------|
 #
 # TODO, FIXME, NOTE
@@ -50,7 +51,9 @@ alias l1="command ls -1"
 
 #alias setting
 alias python='python3'
-alias tags="ctags -R --c++-kinds=+p --fields=+iaS --extra=+q"
+# CODEX MODIFIED: 2026-08-09 12:30:00 KST. Isolate repository Ctags options.
+printf -v ctags_runtime_command '%q' "$VIM_RUNTIME/fun/ctags-runtime"
+alias tags="$ctags_runtime_command -R --c++-kinds=+p --fields=+iaS --extra=+q"
 alias grep='grep --color=auto -n'
 alias bgrep="command grep"
 

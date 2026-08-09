@@ -1,4 +1,5 @@
-# Validate shell scripts and headless Vim configuration loading.
+# Validate shell scripts, Ctags implementations, and runtime health.
+# CODEX MODIFIED: 2026-08-09 13:33:14 KST. Add isolated Ctags and doctor rows.
 name: Validate
 
 on:
@@ -9,8 +10,19 @@ on:
   pull_request:
 
 jobs:
-  shell-and-vim:
+  ctags-and-doctor:
+    name: Ctags and doctor (${{ matrix.implementation }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - implementation: Universal
+            package: universal-ctags
+            binary: ctags-universal
+          - implementation: Exuberant
+            package: exuberant-ctags
+            binary: ctags-exuberant
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -19,15 +31,82 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y \
-            shellcheck vim tmux universal-ctags
+            shellcheck vim tmux "${{ matrix.package }}"
+
+      - name: Require declared Ctags binary
+        run: |
+          ctags_binary=$(command -v -- "${{ matrix.binary }}" || true)
+          if [[ -z "$ctags_binary" || ! -x "$ctags_binary" ]]; then
+            printf 'declared Ctags binary is unavailable: %s\n' \
+              "${{ matrix.binary }}" >&2
+            exit 1
+          fi
 
       - name: Run ShellCheck
         run: |
           shellcheck --severity=error \
+            fun/doctor \
+            fun/ctags-runtime \
             install_awesome_configs.sh \
             my_bashrc.sh \
+            fun/blackcow \
             fun/fun \
+            fun/pepe \
+            fun/rabbit \
             tests/run_tests.sh
 
-      - name: Run repository tests
+      - name: Run repository and semantic Ctags tests
+        env:
+          CTAGS: ${{ matrix.binary }}
         run: bash tests/run_tests.sh
+
+      - name: Run doctor after external installation
+        env:
+          CTAGS: ${{ matrix.binary }}
+        run: |
+          doctor_home=$(mktemp -d)
+          cleanup() {
+            rm -rf -- "$doctor_home"
+          }
+          trap cleanup EXIT
+          HOME="$doctor_home" VIM_RUNTIME="$PWD" \
+            ./install_awesome_configs.sh --force >/dev/null
+          HOME="$doctor_home" VIM_RUNTIME="$PWD" fun/doctor
+
+      - name: Assert Ctags failure diagnostics
+        run: |
+          probe_root=$(mktemp -d)
+          cleanup() {
+            rm -rf -- "$probe_root"
+          }
+          trap cleanup EXIT
+
+          missing_binary="$probe_root/ctags-not-installed"
+          if CTAGS="$missing_binary" fun/ctags-runtime --version \
+            >"$probe_root/missing.out" 2>"$probe_root/missing.err"; then
+            printf 'missing Ctags binary unexpectedly succeeded\n' >&2
+            exit 1
+          fi
+          grep -Fq "failed to probe Ctags executable '$missing_binary'" \
+            "$probe_root/missing.err"
+
+          unknown_binary="$probe_root/unknown-ctags"
+          printf '%s\n' \
+            '#!/bin/sh' \
+            'if [ "${CTAGS+x}" = x ]; then' \
+            '    printf "%s\\n" "CTAGS selector leaked" >&2' \
+            '    exit 42' \
+            'fi' \
+            'printf "%s\\n" "Unknown Ctags"' > "$unknown_binary"
+          chmod +x "$unknown_binary"
+          if CTAGS="$unknown_binary" fun/ctags-runtime --version \
+            >"$probe_root/unknown.out" 2>"$probe_root/unknown.err"; then
+            printf 'unknown Ctags implementation unexpectedly succeeded\n' >&2
+            exit 1
+          fi
+          grep -Fq 'unsupported Ctags implementation' \
+            "$probe_root/unknown.err"
+          if grep -Fq 'CTAGS selector leaked' "$probe_root/unknown.err"; then
+            printf 'CTAGS selector leaked into Ctags child\n' >&2
+            exit 1
+          fi

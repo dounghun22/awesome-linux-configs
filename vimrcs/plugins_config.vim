@@ -1,3 +1,31 @@
+"##############################################################################
+" Copyright (C) 2026 by Donghun Jeong. All right reserved.
+"
+" Basic Information
+" |--------------|----------------------------------------------------------|
+" | File Name    | plugins_config.vim                                      |
+" |--------------|----------------------------------------------------------|
+" | Description  | Configure and expose Vim plugins.                        |
+" |--------------|----------------------------------------------------------|
+" | Author       | Donghun Jeong(dounghun22)                                |
+" |--------------|----------------------------------------------------------|
+" | Created      | 2026-08-09                                               |
+" |--------------|----------------------------------------------------------|
+" | Last Modified| 2026-08-09 12:30:00                                      |
+" |--------------|----------------------------------------------------------|
+"
+" Revision History
+" |-------------------------------------------------------------------------|
+" |      Date     |                    Revision Summary                     |
+" |---------------|---------------------------------------------------------|
+" |   2026-08-09  | Route Taglist through the Ctags runtime wrapper.         |
+" |---------------|---------------------------------------------------------|
+"
+" TODO, FIXME, NOTE
+" CODEX ADDED: 2026-08-09 12:30:00 KST. Set Taglist Ctags before plugin load.
+"
+"##############################################################################
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Important:
 "       This requires that you install https://github.com/amix/vimrc !
@@ -9,6 +37,13 @@
 " => Load pathogen paths
 """"""""""""""""""""""""""""""
 let s:vim_runtime = expand('<sfile>:p:h')."/.."
+if exists('g:vim_runtime_path')
+    let Tlist_Ctags_Cmd = shellescape(
+                \ fnamemodify(g:vim_runtime_path . '/fun/ctags-runtime', ':p'))
+else
+    let Tlist_Ctags_Cmd = shellescape(
+                \ fnamemodify(s:vim_runtime . '/fun/ctags-runtime', ':p'))
+endif
 call pathogen#infect(s:vim_runtime.'/sources_forked/{}')
 call pathogen#infect(s:vim_runtime.'/sources_non_forked/{}')
 

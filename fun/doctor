@@ -1,0 +1,341 @@
+#!/usr/bin/env bash
+# noqa: SIZE_OK
+# CODEX MODIFIED: 2026-08-09 15:00:26 KST. Quote commands and isolate static Vim checks.
+# CODEX MODIFIED: 2026-08-09 14:00:14 KST. This standalone diagnostic CLI keeps
+# related checks together to preserve one safe read-only command surface.
+###############################################################################
+# Copyright (C) 2026 by Donghun Jeong. All right reserved.
+#
+# Basic Information
+# |--------------|----------------------------------------------------------|
+# | File Name    | doctor                                                   |
+# |--------------|----------------------------------------------------------|
+# | Description  | Diagnose repository and installed runtime health         |
+# |--------------|----------------------------------------------------------|
+# | Author       | Donghun Jeong(dounghun22)                                |
+# |--------------|----------------------------------------------------------|
+# | Created      | 2026-08-09                                               |
+# |--------------|----------------------------------------------------------|
+# | Last Modified| 2026-08-09 15:00:26                                      |
+# |--------------|----------------------------------------------------------|
+#
+# Revision History
+# |-------------------------------------------------------------------------|
+# |      Date     |                    Revision Summary                     |
+# |---------------|---------------------------------------------------------|
+# |   2026-08-09  | Added read-only repository and installation checks.     |
+# |   2026-08-09  | Quote resolved commands and omit user Vim execution.    |
+# |---------------|---------------------------------------------------------|
+#
+# TODO, FIXME, NOTE
+# CODEX ADDED: 2026-08-09 12:56:02 KST. Add isolated read-only diagnostics.
+# CODEX MODIFIED: 2026-08-09 12:58:30 KST. Report the actual Ctags version.
+# CODEX MODIFIED: 2026-08-09 13:01:20 KST. Declare the Vim fixture prerequisite.
+# CODEX MODIFIED: 2026-08-09 13:02:32 KST. Complete prerequisite and arg checks.
+# CODEX MODIFIED: 2026-08-09 15:00:26 KST. Keep spaced commands and user Vim code safe.
+
+###############################################################################
+
+set -uo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: doctor [--help] [--version]
+
+Run read-only diagnostics for the Vim runtime and its installed HOME state.
+
+Options:
+  --help, -h  Show this help message.
+  --version   Print the doctor interface version.
+EOF
+}
+
+case ${1-} in
+    --help|-h)
+        (($# == 1)) || {
+            printf 'doctor: malformed arguments\n' >&2
+            usage >&2
+            exit 2
+        }
+        usage
+        exit 0
+        ;;
+    --version)
+        (($# == 1)) || {
+            printf 'doctor: malformed arguments\n' >&2
+            usage >&2
+            exit 2
+        }
+        printf 'doctor 1.0.0\n'
+        exit 0
+        ;;
+    '')
+        if (($# != 0)); then
+            printf 'doctor: malformed empty argument\n' >&2
+            usage >&2
+            exit 2
+        fi
+        ;;
+    *)
+        printf 'doctor: malformed argument: %s\n' "$1" >&2
+        usage >&2
+        exit 2
+        ;;
+esac
+
+problems=0
+internal_errors=0
+
+pass() {
+    printf '  [PASS] %s\n' "$1"
+}
+
+fail() {
+    printf 'doctor: FAIL: %s\n' "$1" >&2
+    ((problems += 1))
+}
+
+internal() {
+    printf 'doctor: INTERNAL: %s\n' "$1" >&2
+    ((internal_errors += 1))
+}
+
+first_line() {
+    local value=$1
+    printf '%s' "${value%%$'\n'*}"
+}
+
+script_path=${BASH_SOURCE[0]}
+if [[ $script_path != */* ]]; then
+    script_path=$(command -v -- "$script_path" || true)
+fi
+script_dir=${script_path%/*}
+runtime_input=${VIM_RUNTIME:-$script_dir/..}
+if ! runtime=$(cd -- "$runtime_input" 2>/dev/null && pwd -P); then
+    fail "runtime directory is unavailable: $runtime_input"
+    runtime=$runtime_input
+fi
+home_dir=${HOME:-}
+if [[ -z $home_dir ]]; then
+    fail 'HOME is not set'
+fi
+
+printf 'doctor: runtime health report\n'
+printf '  Runtime: %s\n' "$runtime"
+printf '  Home: %s\n' "${home_dir:-<unset>}"
+
+required_files=(
+    install_awesome_configs.sh
+    tmux_config/.tmux.conf
+    tmux_config/.tmux.conf.local
+    ctags/ctags-universal.ctags
+    ctags/ctags-exuberant.ctags
+    fun/ctags-runtime
+    fun/doctor
+    vimrcs/basic.vim
+    vimrcs/filetypes.vim
+    vimrcs/plugins_config.vim
+    vimrcs/extended.vim
+    my_configs.vim
+    autoload/pathogen.vim
+    lang_plugin/verilog_systemverilog/syntax/verilog_systemverilog.vim
+    lang_plugin/tcl/tcl.vim
+    lang_plugin/log/log.vim
+    my_bashrc.sh
+)
+missing_files=0
+for relative_path in "${required_files[@]}"; do
+    if [[ ! -f $runtime/$relative_path ]]; then
+        fail "required runtime file is missing: $runtime/$relative_path"
+        ((missing_files += 1))
+    fi
+done
+if ((missing_files == 0)); then
+    pass "required runtime files (${#required_files[@]})"
+fi
+for executable_path in fun/ctags-runtime fun/doctor; do
+    [[ -x $runtime/$executable_path ]] || \
+        fail "required runtime command is not executable: $runtime/$executable_path"
+done
+
+bash_path=
+vim_path=
+tmux_path=
+ctags_path=
+for command_name in bash vim tmux; do
+    resolved=$(command -v -- "$command_name" 2>/dev/null || true)
+    if [[ -z $resolved ]]; then
+        fail "required command is unavailable: $command_name"
+        continue
+    fi
+    case $command_name in
+        bash) bash_path=$resolved; version_output=$("$resolved" --version 2>&1) ;;
+        vim) vim_path=$resolved; version_output=$("$resolved" --version 2>&1) ;;
+        tmux) tmux_path=$resolved; version_output=$("$resolved" -V 2>&1) ;;
+    esac
+    version_status=$?
+    if ((version_status == 0)); then
+        pass "$command_name: $(first_line "$version_output")"
+    else
+        fail "version command failed: $resolved"
+    fi
+done
+
+ctags_command=${CTAGS:-ctags}
+ctags_path=$(command -v -- "$ctags_command" 2>/dev/null || true)
+if [[ -z $ctags_path ]]; then
+    fail "required Ctags command is unavailable: $ctags_command"
+fi
+
+prerequisites=(cat cp env grep mkdir mktemp readlink rm sed sort)
+prerequisites_ok=true
+for command_name in "${prerequisites[@]}"; do
+    if ! command -v -- "$command_name" >/dev/null 2>&1; then
+        internal "diagnostic prerequisite is unavailable: $command_name"
+        prerequisites_ok=false
+    fi
+done
+
+if [[ -n $home_dir && $prerequisites_ok == true ]]; then
+    expected_links=(
+        ".tmux.conf|$runtime/tmux_config/.tmux.conf"
+        ".tmux.conf.local|$runtime/tmux_config/.tmux.conf.local"
+    )
+    for link_spec in "${expected_links[@]}"; do
+        link_name=${link_spec%%|*}
+        expected_target=${link_spec#*|}
+        installed_path=$home_dir/$link_name
+        if [[ ! -L $installed_path ]]; then
+            fail "installed link is missing or not a symlink: $installed_path"
+        elif [[ $(readlink -- "$installed_path") != "$expected_target" ]]; then
+            actual_target=$(readlink -- "$installed_path")
+            fail "installed link has wrong target: $installed_path -> $actual_target"
+        elif [[ ! -e $installed_path ]]; then
+            fail "installed link is broken: $installed_path -> $expected_target"
+        else
+            pass "installed link: $installed_path -> $expected_target"
+        fi
+    done
+
+    vimrc_path=$home_dir/.vimrc
+    escaped_runtime=${runtime//\'/\'\'}
+    if [[ ! -f $vimrc_path ]]; then
+        fail "generated Vim configuration is missing: $vimrc_path"
+    elif ! grep -Fqx "let g:vim_runtime_path = '$escaped_runtime'" "$vimrc_path"; then
+        fail "generated Vim configuration names the wrong runtime: $vimrc_path"
+    else
+        pass "generated Vim configuration: $vimrc_path"
+    fi
+
+    bashrc_path=$home_dir/.bashrc
+    printf -v expected_source 'source %q' "$runtime/my_bashrc.sh"
+    source_count=0
+    if [[ -f $bashrc_path ]]; then
+        source_count=$(grep -Fxc -- "$expected_source" "$bashrc_path" || true)
+    fi
+    if [[ $source_count != 1 ]]; then
+        fail "expected exactly one runtime Bash source in $bashrc_path (found $source_count)"
+    else
+        pass "single runtime Bash source: $bashrc_path"
+    fi
+
+    user_ctags=$home_dir/.ctags
+    if [[ -L $user_ctags ]]; then
+        ctags_target=$(readlink -- "$user_ctags")
+        if [[ $ctags_target == "$runtime"/ctags/* || ! -e $user_ctags ]]; then
+            fail "user Ctags configuration was replaced or is broken: $user_ctags -> $ctags_target"
+        else
+            pass "preserved user Ctags symlink: $user_ctags"
+        fi
+    elif [[ -e $user_ctags ]]; then
+        pass "preserved user Ctags configuration: $user_ctags"
+    else
+        pass "user Ctags configuration is absent (no replacement required): $user_ctags"
+    fi
+fi
+
+shell_files=(
+    install_awesome_configs.sh my_bashrc.sh fun/ctags-runtime fun/doctor
+    fun/blackcow fun/fun fun/pepe fun/rabbit tests/run_tests.sh
+)
+if [[ -n $bash_path ]]; then
+    syntax_failures=0
+    for relative_path in "${shell_files[@]}"; do
+        [[ -f $runtime/$relative_path ]] || continue
+        if ! "$bash_path" -n "$runtime/$relative_path"; then
+            fail "shell syntax check failed: $runtime/$relative_path"
+            ((syntax_failures += 1))
+        fi
+    done
+    ((syntax_failures > 0)) || pass "shell syntax (${#shell_files[@]} files)"
+fi
+
+work_dir=
+if [[ $prerequisites_ok == true ]]; then
+    if work_dir=$(mktemp -d "${TMPDIR:-/tmp}/vim-runtime-doctor.XXXXXX"); then
+        trap 'rm -rf -- "$work_dir"' EXIT
+        mkdir -p "$work_dir/home" "$work_dir/runtime"
+    else
+        internal "cannot create isolated diagnostic directory under ${TMPDIR:-/tmp}"
+    fi
+fi
+
+if [[ -n $work_dir && -n $vim_path && $missing_files == 0 ]]; then
+    # CODEX MODIFIED: 2026-08-09 15:00:26 KST. Load static runtime nodes only.
+    cp -a -- "$runtime/vimrcs" "$runtime/autoload" "$runtime/lang_plugin" \
+        "$runtime/my_plugins" "$runtime/sources_forked" \
+        "$runtime/sources_non_forked" \
+        "$work_dir/runtime/"
+    cat > "$work_dir/vimrc" <<EOF
+let g:vim_runtime_path = '$work_dir/runtime'
+execute 'set runtimepath^=' . fnameescape(g:vim_runtime_path)
+execute 'source ' . fnameescape(g:vim_runtime_path . '/vimrcs/basic.vim')
+execute 'source ' . fnameescape(g:vim_runtime_path . '/vimrcs/filetypes.vim')
+execute 'source ' . fnameescape(g:vim_runtime_path . '/vimrcs/plugins_config.vim')
+execute 'source ' . fnameescape(g:vim_runtime_path . '/vimrcs/extended.vim')
+EOF
+    if HOME=$work_dir/home env -u VIMINIT -u EXINIT \
+        "$vim_path" -Nu "$work_dir/vimrc" -n -i NONE -es -c 'qa!'; then
+        pass "isolated headless Vim static load graph: $vim_path"
+    else
+        fail "isolated headless Vim static load failed: $vim_path with $work_dir/vimrc"
+    fi
+fi
+
+if [[ -n $ctags_path && -n $work_dir && \
+    -x $runtime/fun/ctags-runtime && $missing_files == 0 ]]; then
+    ctags_version=$(HOME=$work_dir/home CTAGS=$ctags_path \
+        "$runtime/fun/ctags-runtime" --version 2>&1)
+    ctags_status=$?
+    if ((ctags_status != 0)); then
+        fail "Ctags wrapper version check failed: $runtime/fun/ctags-runtime using $ctags_path"
+    else
+        ctags_version_line=$(printf '%s\n' "$ctags_version" | \
+            sed -n '/^\(Universal\|Exuberant\) Ctags/{p;q;}')
+        if [[ -n $ctags_version_line ]]; then
+            pass "ctags: $ctags_version_line"
+        else
+            fail "Ctags wrapper returned an unidentified version: $ctags_path"
+        fi
+        printf '%s\n' 'module doctor_fixture;' 'endmodule' > "$work_dir/doctor_fixture.sv"
+        if HOME=$work_dir/home CTAGS=$ctags_path \
+            "$runtime/fun/ctags-runtime" -f "$work_dir/tags" \
+            "$work_dir/doctor_fixture.sv" >/dev/null 2>&1 && \
+            grep -q '^doctor_fixture[[:space:]]' "$work_dir/tags"; then
+            pass "Ctags wrapper/profile behavior: $runtime/fun/ctags-runtime"
+        else
+            fail "Ctags wrapper/profile generation failed: $runtime/fun/ctags-runtime"
+        fi
+    fi
+fi
+
+if ((problems > 0)); then
+    printf 'doctor: %d problem(s) detected\n' "$problems" >&2
+    exit 1
+fi
+if ((internal_errors > 0)); then
+    printf 'doctor: %d internal prerequisite error(s) prevented checks\n' \
+        "$internal_errors" >&2
+    exit 3
+fi
+printf 'doctor: all checks passed\n'
