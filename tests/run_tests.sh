@@ -12,7 +12,7 @@
 # |--------------|----------------------------------------------------------|
 # | Created      | 2026-08-09                                               |
 # |--------------|----------------------------------------------------------|
-# | Last Modified| 2026-08-09 16:09:18                                      |
+# | Last Modified| 2026-08-09 16:48:59                                      |
 # |--------------|----------------------------------------------------------|
 #
 # Revision History
@@ -29,6 +29,8 @@
 # |   2026-08-09  | Reject Ctags probe failures with a nonzero status.       |
 # |   2026-08-09  | Cover doctor executable paths and Vim config isolation.  |
 # |   2026-08-09  | Verify versioned backup listing and restoration.          |
+# |   2026-08-09  | Verify doctor under the util hierarchy.                   |
+# |   2026-08-09  | Verify the Ctags wrapper under the util hierarchy.        |
 # |---------------|---------------------------------------------------------|
 #
 # TODO, FIXME, NOTE
@@ -44,6 +46,10 @@
 # - Run all doctor command wrappers through the resolved Bash interpreter.
 # - ADDED 2026-08-09T16:09:18+09:00
 # - Verify backup versions, dry-run restoration, and pre-restore snapshots.
+# - MODIFIED 2026-08-09T16:48:59+09:00
+# - Move doctor fixtures and assertions from fun to util.
+# - MODIFIED 2026-08-09T16:53:23+09:00
+# - Move Ctags wrapper fixtures and assertions from fun to util.
 
 ###############################################################################
 
@@ -81,7 +87,7 @@ assert_ctags_kind() {
 mkdir -p "$RUNTIME_DIR" "$HOME_DIR" "$ORIGINALS_DIR" "$SCAN_ROOT/.codegraph"
 
 for runtime_entry in autoload ctags fun lang_plugin my_plugins sources_forked \
-    sources_non_forked tmux_config vimrcs; do
+    sources_non_forked tmux_config util vimrcs; do
     ln -s "$ROOT_DIR/$runtime_entry" "$RUNTIME_DIR/$runtime_entry"
 done
 
@@ -105,6 +111,7 @@ scan_stderr="$TEST_ROOT/text-policy-scan.stderr"
 if grep -RInE \
     --exclude-dir='.git' \
     --exclude-dir='.codegraph' \
+    --exclude-dir='backup' \
     --exclude-dir='.omo' \
     --exclude-dir='tests' \
     --exclude-dir='sources_non_forked' \
@@ -188,7 +195,7 @@ legacy_home_dir="$TEST_ROOT/legacy home"
 legacy_ctags_referent="$legacy_runtime_dir/ctags/.ctags"
 mkdir -p "$legacy_runtime_dir" "$legacy_home_dir"
 for runtime_entry in autoload ctags fun lang_plugin my_plugins sources_forked \
-    sources_non_forked tmux_config vimrcs; do
+    sources_non_forked tmux_config util vimrcs; do
     ln -s "$ROOT_DIR/$runtime_entry" "$legacy_runtime_dir/$runtime_entry"
 done
 cp "$ROOT_DIR/my_bashrc.sh" "$legacy_runtime_dir/my_bashrc.sh"
@@ -209,7 +216,7 @@ legacy_backup_dir="$(find "$legacy_runtime_dir/backup" -mindepth 1 -maxdepth 1 \
 [[ "$(readlink "$legacy_backup_dir/.ctags")" == "$legacy_ctags_referent" ]]
 legacy_doctor_output="$(
     HOME="$legacy_home_dir" VIM_RUNTIME="$legacy_runtime_dir" \
-        "$legacy_runtime_dir/fun/doctor"
+        "$legacy_runtime_dir/util/doctor"
 )"
 grep -Fqx 'doctor: all checks passed' <<< "$legacy_doctor_output"
 
@@ -227,13 +234,13 @@ alias_output="$(
     HOME="$HOME_DIR" VIM_RUNTIME="$RUNTIME_DIR" bash -c \
         'source "$1"; alias tags' _ "$RUNTIME_DIR/my_bashrc.sh"
 )"
-printf -v expected_alias_command '%q' "$RUNTIME_DIR/fun/ctags-runtime"
+printf -v expected_alias_command '%q' "$RUNTIME_DIR/util/ctags-runtime"
 [[ "$alias_output" == *"$expected_alias_command"* ]]
 [[ "$alias_output" != *"='ctags "* ]]
 
 HOME="$HOME_DIR" vim -Nu "$HOME_DIR/.vimrc" -n -es \
     -c "if !exists('Tlist_Ctags_Cmd') | cquit 11 | endif" \
-    -c "let expected_ctags_command = shellescape('$RUNTIME_DIR/fun/ctags-runtime')" \
+    -c "let expected_ctags_command = shellescape('$RUNTIME_DIR/util/ctags-runtime')" \
     -c "if Tlist_Ctags_Cmd != expected_ctags_command | cquit 12 | endif" \
     -c "call system(Tlist_Ctags_Cmd . ' --version')" \
     -c "if v:shell_error != 0 | cquit 13 | endif" \
@@ -253,7 +260,7 @@ for command_name in bash vim tmux ctags; do
 done
 doctor_spaced_output="$(
     HOME="$HOME_DIR" VIM_RUNTIME="$RUNTIME_DIR" CTAGS=ctags \
-        PATH="$doctor_bin_dir:$PATH" "$RUNTIME_DIR/fun/doctor"
+        PATH="$doctor_bin_dir:$PATH" "$RUNTIME_DIR/util/doctor"
 )"
 grep -Fqx 'doctor: all checks passed' <<< "$doctor_spaced_output"
 
@@ -263,7 +270,7 @@ printf "call writefile(['unsafe'], '%s')\n" "$doctor_sentinel" \
     >> "$RUNTIME_DIR/my_configs.vim"
 doctor_mutated_output="$(
     HOME="$HOME_DIR" VIM_RUNTIME="$RUNTIME_DIR" CTAGS=ctags \
-        PATH="$doctor_bin_dir:$PATH" "$RUNTIME_DIR/fun/doctor"
+        PATH="$doctor_bin_dir:$PATH" "$RUNTIME_DIR/util/doctor"
 )"
 grep -Fqx 'doctor: all checks passed' <<< "$doctor_mutated_output"
 if [[ -e $doctor_sentinel ]]; then
@@ -273,7 +280,7 @@ fi
 
 ctags_version="$(
     HOME="$HOME_DIR" CTAGS="$CTAGS_BINARY" \
-        "$RUNTIME_DIR/fun/ctags-runtime" --version
+        "$RUNTIME_DIR/util/ctags-runtime" --version
 )"
 ctags_symbols=(top PARAM data ifc C task_f func_f alias_t DEF)
 ctags_extensions=(v vh sv svh svi)
@@ -312,7 +319,7 @@ for extension in "${ctags_extensions[@]}"; do
         "$ctags_macro" > "$fixture"
     tags_file="$ctags_fixture_root/$extension.tags"
     HOME="$HOME_DIR" CTAGS="$CTAGS_BINARY" \
-        "$RUNTIME_DIR/fun/ctags-runtime" -f "$tags_file" "$fixture"
+        "$RUNTIME_DIR/util/ctags-runtime" -f "$tags_file" "$fixture"
     [[ -s "$tags_file" ]]
     for kind_index in "${!ctags_symbols[@]}"; do
         assert_ctags_kind "$tags_file" "${ctags_symbols[$kind_index]}" \
@@ -336,7 +343,7 @@ unknown_tags="$ctags_fixture_root/unknown.tags"
 unknown_stdout="$ctags_fixture_root/unknown.stdout"
 unknown_stderr="$ctags_fixture_root/unknown.stderr"
 if HOME="$HOME_DIR" CTAGS="$unknown_ctags" \
-    "$RUNTIME_DIR/fun/ctags-runtime" -f "$unknown_tags" \
+    "$RUNTIME_DIR/util/ctags-runtime" -f "$unknown_tags" \
     "$ctags_fixture_root/sample.sv" >"$unknown_stdout" 2>"$unknown_stderr"; then
     printf 'Error: unknown Ctags implementation was accepted.\n' >&2
     exit 1
@@ -355,7 +362,7 @@ missing_tags="$ctags_fixture_root/missing.tags"
 missing_stdout="$ctags_fixture_root/missing.stdout"
 missing_stderr="$ctags_fixture_root/missing.stderr"
 if HOME="$HOME_DIR" CTAGS="$missing_ctags" \
-    "$RUNTIME_DIR/fun/ctags-runtime" -f "$missing_tags" \
+    "$RUNTIME_DIR/util/ctags-runtime" -f "$missing_tags" \
     "$ctags_fixture_root/sample.sv" >"$missing_stdout" 2>"$missing_stderr"; then
     printf 'Error: missing Ctags probe was accepted.\n' >&2
     exit 1

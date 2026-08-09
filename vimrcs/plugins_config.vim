@@ -37,12 +37,13 @@
 " => Load pathogen paths
 """"""""""""""""""""""""""""""
 let s:vim_runtime = expand('<sfile>:p:h')."/.."
+" CODEX MODIFIED: 2026-08-09 16:53:23 KST. Use the util Ctags wrapper path.
 if exists('g:vim_runtime_path')
     let Tlist_Ctags_Cmd = shellescape(
-                \ fnamemodify(g:vim_runtime_path . '/fun/ctags-runtime', ':p'))
+                \ fnamemodify(g:vim_runtime_path . '/util/ctags-runtime', ':p'))
 else
     let Tlist_Ctags_Cmd = shellescape(
-                \ fnamemodify(s:vim_runtime . '/fun/ctags-runtime', ':p'))
+                \ fnamemodify(s:vim_runtime . '/util/ctags-runtime', ':p'))
 endif
 call pathogen#infect(s:vim_runtime.'/sources_forked/{}')
 call pathogen#infect(s:vim_runtime.'/sources_non_forked/{}')

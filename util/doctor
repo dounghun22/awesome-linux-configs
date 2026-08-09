@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # noqa: SIZE_OK
+# CODEX MODIFIED: 2026-08-09 16:48:59 KST. Move the diagnostic entrypoint to util.
+# CODEX MODIFIED: 2026-08-09 16:53:23 KST. Use the util Ctags wrapper path.
 # CODEX MODIFIED: 2026-08-09 15:00:26 KST. Quote commands and isolate static Vim checks.
 # CODEX MODIFIED: 2026-08-09 14:00:14 KST. This standalone diagnostic CLI keeps
 # related checks together to preserve one safe read-only command surface.
@@ -16,7 +18,7 @@
 # |--------------|----------------------------------------------------------|
 # | Created      | 2026-08-09                                               |
 # |--------------|----------------------------------------------------------|
-# | Last Modified| 2026-08-09 15:00:26                                      |
+# | Last Modified| 2026-08-09 16:48:59                                      |
 # |--------------|----------------------------------------------------------|
 #
 # Revision History
@@ -25,6 +27,7 @@
 # |---------------|---------------------------------------------------------|
 # |   2026-08-09  | Added read-only repository and installation checks.     |
 # |   2026-08-09  | Quote resolved commands and omit user Vim execution.    |
+# |   2026-08-09  | Move the diagnostic entrypoint into util.               |
 # |---------------|---------------------------------------------------------|
 #
 # TODO, FIXME, NOTE
@@ -130,8 +133,8 @@ required_files=(
     tmux_config/.tmux.conf.local
     ctags/ctags-universal.ctags
     ctags/ctags-exuberant.ctags
-    fun/ctags-runtime
-    fun/doctor
+    util/ctags-runtime
+    util/doctor
     vimrcs/basic.vim
     vimrcs/filetypes.vim
     vimrcs/plugins_config.vim
@@ -153,7 +156,7 @@ done
 if ((missing_files == 0)); then
     pass "required runtime files (${#required_files[@]})"
 fi
-for executable_path in fun/ctags-runtime fun/doctor; do
+for executable_path in util/ctags-runtime util/doctor; do
     [[ -x $runtime/$executable_path ]] || \
         fail "required runtime command is not executable: $runtime/$executable_path"
 done
@@ -255,7 +258,7 @@ if [[ -n $home_dir && $prerequisites_ok == true ]]; then
 fi
 
 shell_files=(
-    install_awesome_configs.sh my_bashrc.sh fun/ctags-runtime fun/doctor
+    install_awesome_configs.sh my_bashrc.sh util/ctags-runtime util/doctor
     fun/blackcow fun/fun fun/pepe fun/rabbit tests/run_tests.sh
 )
 if [[ -n $bash_path ]]; then
@@ -303,12 +306,12 @@ EOF
 fi
 
 if [[ -n $ctags_path && -n $work_dir && \
-    -x $runtime/fun/ctags-runtime && $missing_files == 0 ]]; then
+    -x $runtime/util/ctags-runtime && $missing_files == 0 ]]; then
     ctags_version=$(HOME=$work_dir/home CTAGS=$ctags_path \
-        "$runtime/fun/ctags-runtime" --version 2>&1)
+        "$runtime/util/ctags-runtime" --version 2>&1)
     ctags_status=$?
     if ((ctags_status != 0)); then
-        fail "Ctags wrapper version check failed: $runtime/fun/ctags-runtime using $ctags_path"
+        fail "Ctags wrapper version check failed: $runtime/util/ctags-runtime using $ctags_path"
     else
         ctags_version_line=$(printf '%s\n' "$ctags_version" | \
             sed -n '/^\(Universal\|Exuberant\) Ctags/{p;q;}')
@@ -319,12 +322,12 @@ if [[ -n $ctags_path && -n $work_dir && \
         fi
         printf '%s\n' 'module doctor_fixture;' 'endmodule' > "$work_dir/doctor_fixture.sv"
         if HOME=$work_dir/home CTAGS=$ctags_path \
-            "$runtime/fun/ctags-runtime" -f "$work_dir/tags" \
+            "$runtime/util/ctags-runtime" -f "$work_dir/tags" \
             "$work_dir/doctor_fixture.sv" >/dev/null 2>&1 && \
             grep -q '^doctor_fixture[[:space:]]' "$work_dir/tags"; then
-            pass "Ctags wrapper/profile behavior: $runtime/fun/ctags-runtime"
+            pass "Ctags wrapper/profile behavior: $runtime/util/ctags-runtime"
         else
-            fail "Ctags wrapper/profile generation failed: $runtime/fun/ctags-runtime"
+            fail "Ctags wrapper/profile generation failed: $runtime/util/ctags-runtime"
         fi
     fi
 fi

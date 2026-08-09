@@ -12,7 +12,7 @@
 # |--------------|----------------------------------------------------------|
 # | Created      | 2026-08-09                                               |
 # |--------------|----------------------------------------------------------|
-# | Last Modified| 2026-08-09 16:09:18                                      |
+# | Last Modified| 2026-08-09 16:48:59                                      |
 # |--------------|----------------------------------------------------------|
 #
 # Revision History
@@ -26,6 +26,8 @@
 # |   2026-08-09  | Replace .vimrc symlinks without following their referents. |
 # |   2026-08-09  | Remove only legacy runtime-owned Ctags selector links.    |
 # |   2026-08-09  | Add versioned backup listing and restoration.             |
+# |   2026-08-09  | Move doctor utility into the util hierarchy.              |
+# |   2026-08-09  | Move the Ctags wrapper into the util hierarchy.           |
 # |---------------|---------------------------------------------------------|
 #
 # TODO, FIXME, NOTE
@@ -154,7 +156,8 @@ required_files=(
     # CODEX MODIFIED: 2026-08-09 12:30:00 KST. Require isolated Ctags profiles.
     "ctags/ctags-universal.ctags"
     "ctags/ctags-exuberant.ctags"
-    "fun/ctags-runtime"
+    "util/ctags-runtime"
+    "util/doctor"
     # CODEX MODIFIED: 2026-08-09 11:31:00 KST. Preflight generated Vim sources.
     "vimrcs/basic.vim"
     "vimrcs/filetypes.vim"
@@ -200,7 +203,7 @@ if [[ -z "$CTAGS_PATH" ]]; then
     fi
 else
     export CTAGS="$CTAGS_PATH"
-    if ! "$VIM_RUNTIME/fun/ctags-runtime" --version >/dev/null; then
+    if ! "$VIM_RUNTIME/util/ctags-runtime" --version >/dev/null; then
         die "CTAGS must select Universal Ctags or Exuberant Ctags: $CTAGS_PATH"
     fi
 fi
@@ -575,9 +578,10 @@ update_bashrc
 write_vimrc
 
 if [[ "$DRY_RUN" == true ]]; then
-    printf '[dry-run] chmod +x %s/fun/*\n' "$VIM_RUNTIME"
+    printf '[dry-run] chmod +x %s/fun/* %s/util/*\n' \
+        "$VIM_RUNTIME" "$VIM_RUNTIME"
 else
-    chmod +x "$VIM_RUNTIME"/fun/*
+    chmod +x "$VIM_RUNTIME"/fun/* "$VIM_RUNTIME"/util/*
 fi
 
 if [[ "$DRY_RUN" == true ]]; then

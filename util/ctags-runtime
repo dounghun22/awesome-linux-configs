@@ -1,4 +1,5 @@
 #!/bin/sh
+# CODEX MODIFIED: 2026-08-09 16:53:23 KST. Move the wrapper into util.
 ###############################################################################
 # Copyright (C) 2026 by Donghun Jeong. All right reserved.
 #

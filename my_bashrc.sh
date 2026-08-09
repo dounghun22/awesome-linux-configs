@@ -52,7 +52,8 @@ alias l1="command ls -1"
 #alias setting
 alias python='python3'
 # CODEX MODIFIED: 2026-08-09 12:30:00 KST. Isolate repository Ctags options.
-printf -v ctags_runtime_command '%q' "$VIM_RUNTIME/fun/ctags-runtime"
+# CODEX MODIFIED: 2026-08-09 16:53:23 KST. Use the util Ctags wrapper path.
+printf -v ctags_runtime_command '%q' "$VIM_RUNTIME/util/ctags-runtime"
 alias tags="$ctags_runtime_command -R --c++-kinds=+p --fields=+iaS --extra=+q"
 alias grep='grep --color=auto -n'
 alias bgrep="command grep"
