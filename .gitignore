@@ -2,6 +2,6 @@ temp_dirs/*
 backup/*
 personalized.*
 secret.*
-AGENTS.md
 .codex/*
+AGENTS.md
 .omo/*
