@@ -82,6 +82,9 @@ autocmd BufRead *.twig set syntax=html filetype=html
 """"""""""""""""""""""""""""""
 let vim_markdown_folding_disabled = 1
 
+""""""""""""""""""""""""""""""
+" => For RTL
+""""""""""""""""""""""""""""""
 au BufNewFile,BufRead *.v set filetype=systemverilog
 au BufNewFile,BufRead *.sv set filetype=systemverilog
 execute 'au FileType systemverilog source ' . fnameescape(
@@ -89,12 +92,15 @@ execute 'au FileType systemverilog source ' . fnameescape(
       \ . 'verilog_systemverilog.vim')
 au FileType systemverilog let g:AutoPairs = {'(':')', '[':']', '{':'}'}
 
-autocmd FileType make set noexpandtab
 autocmd BufRead,BufnewFile *.f set filetype=tcl
 autocmd BufRead,BufnewFile *.sdc set filetype=tcl
 autocmd BufRead,BufnewFile *.tcl set filetype=tcl
 execute 'autocmd FileType tcl source ' . fnameescape(
       \ s:vim_runtime_path . '/lang_plugin/tcl/tcl.vim')
+
+autocmd BufRead,BufnewFile *.rdl set filetype=rdl
+execute 'autocmd FileType rdl source ' . fnameescape(
+      \ s:vim_runtime_path . '/lang_plugin/rdl/rdl.vim')
 
 au BufNewFile,BufRead *.log set filetype=log
 au BufNewFile,BufRead *_log set filetype=log
@@ -103,6 +109,14 @@ au BufNewFile,BufRead *_LOG set filetype=log
 execute 'autocmd FileType log source ' . fnameescape(
       \ s:vim_runtime_path . '/lang_plugin/log/log.vim')
 
+""""""""""""""""""""""""""""""
+" => Make file
+""""""""""""""""""""""""""""""
+autocmd FileType make set noexpandtab
+
+""""""""""""""""""""""""""""""
+" => Rainbow
+""""""""""""""""""""""""""""""
 let g:rainbow_active = 1
 
 let g:rainbow_load_separately = [
@@ -111,6 +125,8 @@ let g:rainbow_load_separately = [
     \ [ '*.cpp' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
     \ [ '*.{html,htm}' , [['(', ')'], ['\[', '\]'], ['{', '}'], ['<\a[^>]*>', '</[^>]*>']] ],
     \ ]
+
+autocmd BufNewFile,BufRead *.csv   set filetype=csv
 
 """"""""""""""""""""""""""""""
 " => Large File
