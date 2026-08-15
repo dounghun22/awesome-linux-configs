@@ -5,6 +5,15 @@ endif
 
 execute 'source ' . fnameescape(g:vim_runtime_path . '/personalized.vim')
 
+" EasyAlign delimiter rules shared by all runtime installations.
+let g:easy_align_delimiters = get(g:, 'easy_align_delimiters', {})
+let g:easy_align_delimiters['('] = { 'pattern': '\V(', 'left_margin': 1, 'right_margin': 0 }
+let g:easy_align_delimiters[')'] = { 'pattern': '\V)', 'left_margin': 0, 'right_margin': 0 }
+let g:easy_align_delimiters['<='] = { 'pattern': '\V<=', 'left_margin': 0, 'right_margin': 0 }
+let g:easy_align_delimiters[';'] = { 'pattern': '\V;', 'left_margin': 0, 'right_margin': 0 }
+let g:easy_align_delimiters['['] = { 'pattern': '\V[', 'left_margin': 0, 'right_margin': 0 }
+let g:easy_align_delimiters[']'] = { 'pattern': '\V]', 'left_margin': 0, 'right_margin': 0 }
+
 " For Neovim 0.1.3 and 0.1.4
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 
